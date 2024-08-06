@@ -1,0 +1,32 @@
+{
+  "name": "jquery-csp-report-api",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "format": "eslint . --fix && prettier --write .",
+    "lint": "concurrently \"eslint .\" \"prettier --check .\" \"npm run typescript\"",
+    "start": "npm run dev",
+    "test": "vitest .",
+    "types": "wrangler types",
+    "typescript": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240729.0",
+    "@eslint/js": "^9.8.0",
+    "@types/eslint__js": "^8.42.3",
+    "concurrently": "^8.2.2",
+    "eslint": "^9.8.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-astro": "^1.2.3",
+    "eslint-plugin-tailwindcss": "^3.17.4",
+    "prettier": "^3.3.3",
+    "prettier-plugin-organize-imports": "^4.0.0",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.0.1",
+    "vitest": "2.0",
+    "wrangler": "^3.68.0"
+  }
+}
