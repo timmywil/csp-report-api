@@ -1,4 +1,4 @@
-# jquery-csp-report-api
+# csp-report-api
 
 A [Cloudflare Worker](https://developers.cloudflare.com/browser-rendering/) that live logs reports from the [Content Security Policy (CSP) Reporting API](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP).
 
