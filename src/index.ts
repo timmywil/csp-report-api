@@ -9,15 +9,35 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
-interface CSPReport {
+// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-to#violation_report_syntax
+interface CSPReportTo {
+  age: number
+  body: {
+    blockedURL: string
+    columnNumber: number
+    disposition: 'enforce' | 'report'
+    documentURL: string
+    effectiveDirective: string
+    lineNumber: number
+    originalPolicy: string
+    referrer: string
+    sample: string
+    sourceFile: string
+    statusCode: number
+  }
+  type: 'csp-violation'
+  url: string
+  user_agent: string
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri#csp_violation_report_with_content-security-policy
+interface CSPReportUri {
   'blocked-uri': string
-  disposition: string
+  disposition: 'enforce' | 'report'
   'document-uri': string
   'effective-directive': string
   'original-policy': string
-  referrer: string
   'status-code': number
-  'violated-directive': string
 }
 
 export default {
@@ -27,36 +47,69 @@ export default {
     _context: ExecutionContext
   ): Promise<Response> {
     if (request.method !== 'POST') {
-      return new Response('Method not allowed', {
-        status: 405
-      })
+      return new Response('Method not allowed', { status: 405 })
+    }
+    const contentType = request.headers.get('content-type')
+
+    // Reports via report-to directive
+    if (contentType === 'application/reports+json') {
+      let data: CSPReportTo
+      try {
+        data = await request.json()
+      } catch (_) {
+        return new Response('Request Invalid', { status: 400 })
+      }
+
+      const report = data.body
+      if (
+        !report.documentURL ||
+        !report.statusCode ||
+        !report.effectiveDirective ||
+        !report.blockedURL
+      ) {
+        return new Response('Request Invalid', { status: 400 })
+      }
+
+      console.log(
+        [
+          `CSP Violation (${report.disposition}): ${report.documentURL} ${report.statusCode}`,
+          `[${report.effectiveDirective}]: ${report.blockedURL}`
+        ].join('\n')
+      )
+
+      return new Response(null, { status: 204 })
     }
 
-    if (request.headers.get('content-type') !== 'application/csp-report') {
-      return new Response('Invalid content type', {
-        status: 400
-      })
+    // Reports via deprecated report-uri directive
+    if (contentType === 'application/csp-report') {
+      let data: { 'csp-report': CSPReportUri }
+      try {
+        data = await request.json()
+      } catch (_) {
+        return new Response('Request Invalid', { status: 400 })
+      }
+
+      const report = data?.['csp-report']
+      if (
+        typeof report !== 'object' ||
+        !report['document-uri'] ||
+        !report['status-code'] ||
+        !report['effective-directive'] ||
+        !report['blocked-uri']
+      ) {
+        return new Response('Request Invalid', { status: 400 })
+      }
+
+      console.log(
+        [
+          `CSP Violation (${report.disposition}): ${report['document-uri']} ${report['status-code']}`,
+          `[${report['effective-directive']}]: ${report['blocked-uri']}`
+        ].join('\n')
+      )
+
+      return new Response(null, { status: 204 })
     }
 
-    let data: { 'csp-report': CSPReport }
-    try {
-      data = await request.json()
-    } catch (_) {
-      return new Response('Invalid JSON', {
-        status: 400
-      })
-    }
-
-    const report = data?.['csp-report']
-    if (!report) {
-      return new Response('Invalid JSON', {
-        status: 400
-      })
-    }
-
-    console.log(`${report['document-uri']} ${report['status-code']}`)
-    console.log(`[${report['effective-directive']}]: ${report['blocked-uri']}`)
-
-    return new Response(null, { status: 204 })
+    return new Response('Request Invalid', { status: 400 })
   }
 } satisfies ExportedHandler<Env>
