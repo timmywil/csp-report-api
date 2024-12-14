@@ -72,7 +72,7 @@ export default {
 
       console.log(
         [
-          `CSP Violation (${report.disposition}): ${report.documentURL} ${report.statusCode}`,
+          `CSP report-to (${report.disposition}): ${report.documentURL} ${report.statusCode}`,
           `[${report.effectiveDirective}]: ${report.blockedURL}`
         ].join('\n')
       )
@@ -102,7 +102,7 @@ export default {
 
       console.log(
         [
-          `CSP Violation (${report.disposition}): ${report['document-uri']} ${report['status-code']}`,
+          `CSP report-uri (${report.disposition}): ${report['document-uri']} ${report['status-code']}`,
           `[${report['effective-directive']}]: ${report['blocked-uri']}`
         ].join('\n')
       )
