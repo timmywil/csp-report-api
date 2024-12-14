@@ -62,6 +62,9 @@ export default {
 
       const report = data.body
       if (
+        data.type !== 'csp-violation' ||
+        typeof report !== 'object' ||
+        !report.disposition ||
         !report.documentURL ||
         !report.statusCode ||
         !report.effectiveDirective ||
@@ -72,8 +75,9 @@ export default {
 
       console.log(
         [
-          `CSP report-to (${report.disposition}): ${report.documentURL} ${report.statusCode}`,
-          `[${report.effectiveDirective}]: ${report.blockedURL}`
+          `CSP report-to (${report.disposition}):`,
+          `[${report.effectiveDirective}]: ${report.blockedURL}`,
+          `${report.statusCode} - ${report.documentURL}`
         ].join('\n')
       )
 
@@ -92,6 +96,7 @@ export default {
       const report = data?.['csp-report']
       if (
         typeof report !== 'object' ||
+        !report.disposition ||
         !report['document-uri'] ||
         !report['status-code'] ||
         !report['effective-directive'] ||
@@ -102,8 +107,9 @@ export default {
 
       console.log(
         [
-          `CSP report-uri (${report.disposition}): ${report['document-uri']} ${report['status-code']}`,
-          `[${report['effective-directive']}]: ${report['blocked-uri']}`
+          `CSP report-to (${report.disposition}):`,
+          `[${report['effective-directive']}]: ${report['blocked-uri']}`,
+          `${report['status-code']} - ${report['document-uri']}`
         ].join('\n')
       )
 
