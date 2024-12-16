@@ -125,4 +125,15 @@ describe('CSP Report API', () => {
     })
     expect(response.status).toBe(204)
   })
+
+  it('prevents duplicate messages', async () => {
+    const response = await fetch('http://localhost:8787', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/reports+json'
+      },
+      body: JSON.stringify(exampleTo)
+    })
+    expect(response.status).toBe(204)
+  })
 })

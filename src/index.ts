@@ -40,6 +40,8 @@ interface CSPReportUri {
   'status-code': number
 }
 
+let lastMessage = ''
+
 export default {
   async fetch(
     request: Request,
@@ -73,13 +75,17 @@ export default {
         return new Response('Request Invalid', { status: 400 })
       }
 
-      console.log(
-        [
-          `CSP report-to (${report.disposition}):`,
-          `[${report.effectiveDirective}]: ${report.blockedURL}`,
-          `${report.statusCode} - ${report.documentURL}`
-        ].join('\n')
-      )
+      const message = [
+        `CSP report-to (${report.disposition})`,
+        `[${report.effectiveDirective}]: ${report.blockedURL}`,
+        `${report.statusCode} - ${report.documentURL}`
+      ].join(' | ')
+
+      // Prevent duplicate messages
+      if (lastMessage !== message) {
+        console.log(message)
+        lastMessage = message
+      }
 
       return new Response(null, { status: 204 })
     }
@@ -105,13 +111,17 @@ export default {
         return new Response('Request Invalid', { status: 400 })
       }
 
-      console.log(
-        [
-          `CSP report-to (${report.disposition}):`,
-          `[${report['effective-directive']}]: ${report['blocked-uri']}`,
-          `${report['status-code']} - ${report['document-uri']}`
-        ].join('\n')
-      )
+      const message = [
+        `CSP report-uri (${report.disposition})`,
+        `[${report['effective-directive']}]: ${report['blocked-uri']}`,
+        `${report['status-code']} - ${report['document-uri']}`
+      ].join(' | ')
+
+      // Prevent duplicate messages
+      if (lastMessage !== message) {
+        console.log(message)
+        lastMessage = message
+      }
 
       return new Response(null, { status: 204 })
     }
